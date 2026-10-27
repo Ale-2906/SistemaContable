@@ -94,6 +94,7 @@ export default function OrgChartView() {
               <span className="grade-badge">{p.salary_grade}</span>
             )}
           </div>
+          <span className="position-hierarchy-level">Nivel {depth + 1}</span>
           <h3>{p.name}</h3>
           <div className="position-people">
             {people.length
@@ -139,7 +140,7 @@ export default function OrgChartView() {
       <section className="surface-panel">
         <div className="panel-toolbar">
           <div>
-            <h2>Equipo actual</h2>
+            <h2>Estructura jerárquica</h2>
             <p>
               {positions.length} puestos · {employees.length} colaboradores
               activos
