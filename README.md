@@ -233,3 +233,8 @@ La tabla de **Cargos y escalas** muestra grados, rangos y personal asignado.
 La asignación conserva sueldos, referencias de cargos, historial y nóminas.
 [Asignaciones y excepciones](docs/ESCALAS_SALARIALES.md).
 Prueba: `npx --yes --package=node@22 node server/tests/salary_scales.cjs`.
+
+## Datos en Render
+
+Consulta [Migración de SQLite a Render](docs/SQLITE_RENDER.md) para exportar
+los datos locales y conservarlos en un disco persistente.
