@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict');
+process.env.DATABASE_PATH=':memory:';
+require('../database/seed')();
+const db=require('../config/database'),init=require('../database/init');
+const draft=db.prepare("SELECT * FROM payrolls WHERE status='GENERADO' LIMIT 1").get();
+const snapshot=JSON.parse(draft.calculation_snapshot_json);snapshot.tax.version=1;
+const legacy=JSON.stringify(snapshot);
+db.prepare('UPDATE payrolls SET calculation_snapshot_json=? WHERE id=?').run(legacy,draft.id);
+const period=db.prepare("INSERT INTO pay_periods (name,start_date,end_date,payment_date,status) VALUES ('Histórico cerrado','2026-05-01','2026-05-31','2026-05-31','CERRADO')").run().lastInsertRowid;
+const closed=db.prepare("INSERT INTO payrolls (period_id,employee_id,base_salary_snapshot,total_income,total_deductions,net_salary,status,calculation_snapshot_json) VALUES (?,?,1000,1000,100,900,'APROBADO','{}')").run(period,draft.employee_id).lastInsertRowid;
+init();
+const changed=db.prepare('SELECT * FROM payrolls WHERE id=?').get(draft.id);
+assert.equal(changed.status,'DESACTUALIZADO');assert.equal(changed.net_salary,draft.net_salary);assert.equal(changed.calculation_snapshot_json,legacy);
+assert.equal(db.prepare('SELECT status FROM payrolls WHERE id=?').get(closed).status,'APROBADO');
+const auditCount=db.prepare("SELECT COUNT(*) AS n FROM audit_logs WHERE action='TAX_RULES_UPDATED'").get().n;
+init();assert.equal(db.prepare("SELECT COUNT(*) AS n FROM audit_logs WHERE action='TAX_RULES_UPDATED'").get().n,auditCount);
+assert.equal(db.prepare('SELECT net_salary FROM payrolls WHERE id=?').get(closed).net_salary,900);
+db.close();console.log('PASS: migración idempotente; solo borradores obsoletos cambian de estado, importes y roles cerrados intactos.');

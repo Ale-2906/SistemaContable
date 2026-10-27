@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import { occupiedHierarchy } from '../../client/src/utils/organization.mjs';
+const positions=[{id:1,parent_position_id:null},{id:2,parent_position_id:1},{id:3,parent_position_id:2},{id:4,parent_position_id:3},{id:5,parent_position_id:2},{id:6,parent_position_id:99}];
+const employees=[{position_id:2,status:'ACTIVO'},{position_id:4,status:'ACTIVO'},{position_id:4,status:'ACTIVO'},{position_id:5,status:'INACTIVO'},{position_id:6,status:'ACTIVO'}];
+const result=occupiedHierarchy(positions,employees);
+assert.deepEqual(result.map(p=>p.id),[2,4,6]);
+assert.equal(result.find(p=>p.id===2).parent_position_id,null);
+assert.equal(result.find(p=>p.id===4).parent_position_id,2);
+assert.equal(result.find(p=>p.id===6).parent_position_id,null);
+assert.equal(positions[3].parent_position_id,3,'No modificar la jerarquía guardada');
+assert.deepEqual(occupiedHierarchy(positions,[]),[]);
+assert.deepEqual(occupiedHierarchy([{id:1,parent_position_id:2},{id:2,parent_position_id:1}],[{position_id:1,status:'ACTIVO'}]),[{id:1,parent_position_id:null}]);
+console.log('PASS: solo cargos ocupados, personal inactivo excluido, jerarquía a través de vacantes, sin duplicados y sin modificar datos originales.');

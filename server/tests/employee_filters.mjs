@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {filterEmployees} from '../../client/src/utils/employeeFilters.mjs';
+const rows=[{id:1,first_name:'José',last_name:'López',cedula:'1001',email:'jose@a.ec',department_id:1,department_name:'Tecnología',position_id:1,position_name:'Analista',status:'ACTIVO',base_salary:1200,decimo13_mode:'MENSUAL',decimo14_mode:'ANUAL',hire_date:'2026-01-01'},{id:2,first_name:'Ana',last_name:'Pérez',cedula:'1002',department_id:2,position_id:2,position_name:'Contadora',status:'INACTIVO',base_salary:1800,decimo13_mode:'ANUAL',decimo14_mode:'ANUAL',hire_date:'2026-09-01'}];
+assert.deepEqual(filterEmployees(rows,{search:'JOSE lopez'}).map(e=>e.id),[1]);
+assert.deepEqual(filterEmployees(rows,{search:'tecnologia analista'}).map(e=>e.id),[1]);
+assert.equal(filterEmployees(rows,{search:'1001'}).length,1);
+assert.equal(filterEmployees(rows,{departmentId:'1',positionId:'1',status:'ACTIVO',salaryMin:1000,salaryMax:1500,decimo13:'MENSUAL',decimo14:'ANUAL'}).length,1);
+assert.equal(filterEmployees(rows,{status:'INACTIVO',departmentId:1}).length,0);
+assert.equal(filterEmployees(rows,{salaryMin:2000,salaryMax:1000}).length,0);
+assert.equal(filterEmployees(rows,{sort:'salaryDesc'})[0].id,2);
+assert.equal(filterEmployees(rows,{sort:'salaryAsc'})[0].id,1);
+assert.equal(filterEmployees(rows,{sort:'recent'})[0].id,2);
+assert.deepEqual(rows.map(e=>e.id),[1,2]);
+console.log('PASS: filtros combinados, búsqueda sin tildes, montos, orden y datos originales sin cambios.');
